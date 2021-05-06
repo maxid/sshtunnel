@@ -3,6 +3,7 @@ package sshtunnel
 import (
 	"io"
 	"net"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -121,10 +122,15 @@ func (tunnel *SSHTunnel) Close() {
 	return
 }
 
-// NewSSHTunnel creates a new single-use tunnel. Supplying "0" for localport will use a random port.
-func NewSSHTunnel(tunnel string, auth ssh.AuthMethod, destination string, localport string) *SSHTunnel {
+// NewSSHTunnel creates a new single-use tunnel. Supplying "0" for local will use a random port.
+func NewSSHTunnel(tunnel string, auth ssh.AuthMethod, destination string, local string) *SSHTunnel {
 
-	localEndpoint := NewEndpoint("localhost:" + localport)
+	if parts := strings.Split(local, ":"); len(parts) > 1 {
+		if parts[0] == "" {
+			local = "localhost:" + local
+		}
+	}
+	localEndpoint := NewEndpoint(local)
 
 	server := NewEndpoint(tunnel)
 	if server.Port == 0 {
